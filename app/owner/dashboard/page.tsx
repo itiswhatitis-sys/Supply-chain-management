@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/ownerdashboard/Sidebar';
 import { StatsCards } from '@/components/ownerdashboard/StatsCards';
-import { CampaignChart } from '@/components/ownerdashboard/CampaignChart';
 import { ActivityFeed } from '@/components/ownerdashboard/ActivityFeed';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { signOut, useSession } from 'next-auth/react';
+import { SupplyChainChart } from '@/components/ownerdashboard/CampaignChart';
 
 export default function SupplierDashboardPage() {
   const router = useRouter();
@@ -53,7 +53,7 @@ if(!session){
         
         <StatsCards className="mb-8" />
         
-        <CampaignChart className="mb-8" />
+        <SupplyChainChart className="mb-8" />
         
         <ActivityFeed className="mb-8" />
       </div>

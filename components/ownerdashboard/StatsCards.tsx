@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, CheckCircle, Clock, TrendingUp, TrendingDown } from 'lucide-react';
+import {
+  Truck,
+  Package,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Factory,
+} from 'lucide-react';
 
 interface StatsCardsProps {
   className?: string;
-  companyId?: string;
 }
 
 interface KPI {
@@ -16,173 +23,161 @@ interface KPI {
 }
 
 interface KPIData {
-  totalCampaigns: KPI;
-  activeCampaigns: KPI;
-  totalApplications: KPI;
-  pendingApplications: KPI;
-  selectedCandidates: KPI;
-  totalCompanies: KPI;
+  totalShipments: KPI;
+  inTransitOrders: KPI;
+  deliveredOrders: KPI;
+  pendingOrders: KPI;
+  totalWarehouses: KPI;
+  supplierCount: KPI;
 }
 
-export function StatsCards({ className, companyId }: StatsCardsProps) {
+export function StatsCards({ className }: StatsCardsProps) {
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const fetchKPIs = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Build query parameters
-      const params = new URLSearchParams({ dateRange: 'all' });
-      if (companyId) {
-        params.append('companyIds', companyId);
-      }
-      
-      const response = await fetch(`/api/dashboard/kpis?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch KPIs');
-      }
-      
-      const data = await response.json();
-      setKpis(data.kpis);
-    } catch (err) {
-      console.error('Failed to fetch KPIs:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch stats');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchKPIs();
-  }, [companyId]);
+    // ✅ Hardcoded mock Supply Chain data
+    const mockData: KPIData = {
+      totalShipments: { value: 1240, trend: 8.4, label: 'Total Shipments' },
+      inTransitOrders: { value: 342, trend: 2.5, label: 'In-Transit Orders' },
+      deliveredOrders: { value: 815, trend: 5.8, label: 'Delivered Orders' },
+      pendingOrders: { value: 83, trend: -3.2, label: 'Pending Orders' },
+      totalWarehouses: { value: 12, trend: 0.0, label: 'Total Warehouses' },
+      supplierCount: { value: 48, trend: 4.1, label: 'Suppliers' },
+    };
+
+    setKpis(mockData);
+  }, []);
 
   const renderTrendIndicator = (trend: number | null) => {
     if (trend === null || trend === 0) return null;
-    
+
     const isPositive = trend > 0;
     const TrendIcon = isPositive ? TrendingUp : TrendingDown;
     const colorClass = isPositive ? 'text-green-600' : 'text-red-600';
-    
+
     return (
       <div className={`flex items-center gap-1 ${colorClass}`}>
         <TrendIcon className="h-3 w-3" />
-        <span className="text-xs font-medium">
-          {Math.abs(trend).toFixed(1)}%
-        </span>
+        <span className="text-xs font-medium">{Math.abs(trend).toFixed(1)}%</span>
       </div>
     );
   };
 
-  if (error) {
-    return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}>
-        <Card className="col-span-full">
-          <CardContent className="flex items-center justify-center py-8">
-            <p className="text-sm text-muted-foreground">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}>
-      {/* Total Campaigns */}
+      {/* Total Shipments */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-          <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Total Shipments</CardTitle>
+          <Truck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="h-8 w-16 bg-muted animate-pulse rounded"></div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{kpis?.totalCampaigns.value || 0}</div>
-                {kpis?.totalCampaigns.trend && renderTrendIndicator(kpis.totalCampaigns.trend)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {(kpis?.totalCampaigns.value || 0) > 0 
-                  ? `${kpis?.totalCampaigns.value} campaigns created` 
-                  : 'No campaigns yet'}
-              </p>
-            </>
-          )}
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.totalShipments.value}</div>
+            {renderTrendIndicator(kpis?.totalShipments.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.totalShipments.value
+              ? `${kpis.totalShipments.value} shipments processed`
+              : 'No shipments yet'}
+          </p>
         </CardContent>
       </Card>
 
-      {/* Active Campaigns */}
+      {/* In-Transit Orders */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+          <CardTitle className="text-sm font-medium">In-Transit Orders</CardTitle>
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="h-8 w-16 bg-muted animate-pulse rounded"></div>
-          ) : (
-            <>
-              <div className="text-2xl font-bold">{kpis?.activeCampaigns.value || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {(kpis?.activeCampaigns.value || 0) > 0 
-                  ? `${kpis?.activeCampaigns.value} campaigns in progress` 
-                  : 'No active campaigns'}
-              </p>
-            </>
-          )}
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.inTransitOrders.value}</div>
+            {renderTrendIndicator(kpis?.inTransitOrders.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.inTransitOrders.value
+              ? `${kpis.inTransitOrders.value} orders currently moving`
+              : 'No orders in transit'}
+          </p>
         </CardContent>
       </Card>
 
-      {/* Total Applications */}
+      {/* Delivered Orders */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="h-8 w-16 bg-muted animate-pulse rounded"></div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">{kpis?.totalApplications.value || 0}</div>
-                {kpis?.totalApplications.trend && renderTrendIndicator(kpis.totalApplications.trend)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {(kpis?.totalApplications.value || 0) > 0 
-                  ? `${kpis?.totalApplications.value} total applications received` 
-                  : 'No applications yet'}
-              </p>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Selected Candidates */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Selected Candidates</CardTitle>
+          <CardTitle className="text-sm font-medium">Delivered Orders</CardTitle>
           <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="h-8 w-16 bg-muted animate-pulse rounded"></div>
-          ) : (
-            <>
-              <div className="text-2xl font-bold">{kpis?.selectedCandidates.value || 0}</div>
-              <p className="text-xs text-muted-foreground">
-                {(kpis?.selectedCandidates.value || 0) > 0 
-                  ? `${kpis?.selectedCandidates.value} candidates selected` 
-                  : 'No selections yet'}
-              </p>
-            </>
-          )}
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.deliveredOrders.value}</div>
+            {renderTrendIndicator(kpis?.deliveredOrders.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.deliveredOrders.value
+              ? `${kpis.deliveredOrders.value} orders successfully delivered`
+              : 'No deliveries yet'}
+          </p>
         </CardContent>
       </Card>
+
+      {/* Pending Orders */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+          <Package className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.pendingOrders.value}</div>
+            {renderTrendIndicator(kpis?.pendingOrders.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.pendingOrders.value
+              ? `${kpis.pendingOrders.value} orders awaiting dispatch`
+              : 'No pending orders'}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Total Warehouses */}
+      {/* <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Warehouses</CardTitle>
+          <Factory className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.totalWarehouses.value}</div>
+            {renderTrendIndicator(kpis?.totalWarehouses.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.totalWarehouses.value
+              ? `${kpis.totalWarehouses.value} active warehouses`
+              : 'No warehouses added'}
+          </p>
+        </CardContent>
+      </Card> */}
+
+      {/* Suppliers */}
+      {/* <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Suppliers</CardTitle>
+          <Truck className="h-4 w-4 text-muted-foreground rotate-180" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold">{kpis?.supplierCount.value}</div>
+            {renderTrendIndicator(kpis?.supplierCount.trend ?? null)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {kpis?.supplierCount.value
+              ? `${kpis.supplierCount.value} registered suppliers`
+              : 'No suppliers yet'}
+          </p>
+        </CardContent>
+      </Card> */}
     </div>
   );
 }

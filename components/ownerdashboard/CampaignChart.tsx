@@ -1,19 +1,34 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 
-interface CampaignChartProps {
+interface SupplyChainChartProps {
   className?: string;
-  companyId?: string;
 }
 
 interface BarDataItem {
   date: string;
-  applications: number;
+  shipments: number;
 }
 
 interface PieDataItem {
@@ -22,185 +37,125 @@ interface PieDataItem {
   color: string;
 }
 
-export function CampaignChart({ className, companyId }: CampaignChartProps) {
+export function SupplyChainChart({ className }: SupplyChainChartProps) {
   const [chartData, setChartData] = useState<{
     barData: BarDataItem[];
     pieData: PieDataItem[];
-    isLoading: boolean;
-    error: string | null;
   }>({
     barData: [],
     pieData: [],
-    isLoading: true,
-    error: null
   });
 
-  const fetchChartData = useCallback(async () => {
-    try {
-      setChartData(prev => ({ ...prev, isLoading: true, error: null }));
-      
-      // Build query parameters
-      const params = new URLSearchParams({ dateRange: 'last30days' });
-      if (companyId) {
-        params.append('companyIds', companyId);
-      }
-      
-      // Fetch both applications over time and campaign status distribution
-      const [applicationsResponse, campaignStatusResponse] = await Promise.all([
-        fetch(`/api/dashboard/applications-chart?${params.toString()}`),
-        fetch(`/api/dashboard/campaign-status?${companyId ? `companyIds=${companyId}` : ''}`)
-      ]);
-
-      if (!applicationsResponse.ok || !campaignStatusResponse.ok) {
-        throw new Error('Failed to fetch chart data');
-      }
-
-      const [applicationsData, campaignStatusData] = await Promise.all([
-        applicationsResponse.json(),
-        campaignStatusResponse.json()
-      ]);
-
-      setChartData({
-        barData: applicationsData.chartData || [],
-        pieData: campaignStatusData.chartData || [],
-        isLoading: false,
-        error: null
-      });
-    } catch (error) {
-      console.error('Failed to fetch chart data:', error);
-      setChartData(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch chart data'
-      }));
-    }
-  }, [companyId]);
-
   useEffect(() => {
-    fetchChartData();
+    // ✅ Hardcoded mock supply chain data
+    const mockBarData: BarDataItem[] = [
+      { date: 'Oct 1', shipments: 120 },
+      { date: 'Oct 5', shipments: 150 },
+      { date: 'Oct 10', shipments: 180 },
+      { date: 'Oct 15', shipments: 90 },
+      { date: 'Oct 20', shipments: 210 },
+      { date: 'Oct 22', shipments: 175 },
+    ];
+
+    const mockPieData: PieDataItem[] = [
+      { name: 'Delivered', value: 620, color: '#22c55e' },
+      { name: 'In Transit', value: 280, color: '#3b82f6' },
+      { name: 'Pending', value: 140, color: '#facc15' },
+      { name: 'Delayed', value: 60, color: '#ef4444' },
+    ];
+
+    setChartData({
+      barData: mockBarData,
+      pieData: mockPieData,
+    });
   }, []);
-
-  const renderError = () => (
-    <div className="h-full flex flex-col items-center justify-center text-center p-4">
-      <p className="text-sm text-muted-foreground mb-4">{chartData.error}</p>
-      <Button variant="outline" size="sm" onClick={fetchChartData}>
-        <RefreshCw className="h-4 w-4 mr-2" />
-        Try Again
-      </Button>
-    </div>
-  );
-
-  const renderEmptyState = (title: string) => (
-    <div className="h-full flex items-center justify-center text-center p-4">
-      <div>
-        <p className="text-sm text-muted-foreground mb-2">{title}</p>
-        <p className="text-xs text-muted-foreground">Data will appear here once available</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-4 ${className}`}>
-      {/* Applications Over Time */}
+      {/* 📦 Shipments Over Time */}
       <Card className="col-span-1">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Applications Over Time</CardTitle>
-            <CardDescription>Daily application trends (Last 30 days)</CardDescription>
+            <CardTitle>Shipments Over Time</CardTitle>
+            <CardDescription>Shipment trends (Last 30 days)</CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchChartData}
-            disabled={chartData.isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 ${chartData.isLoading ? 'animate-spin' : ''}`} />
-          </Button>
         </CardHeader>
         <CardContent className="h-80">
-          {chartData.error ? renderError() : chartData.isLoading ? (
-            <div className="h-full w-full bg-muted animate-pulse rounded"></div>
-          ) : chartData.barData.length === 0 ? 
-            renderEmptyState('No application data available') : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData.barData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="date" 
-                  className="text-xs" 
-                  tick={{ fontSize: 12 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis className="text-xs" tick={{ fontSize: 12 }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    borderColor: 'hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                />
-                <Bar 
-                  dataKey="applications" 
-                  fill="hsl(var(--primary))" 
-                  radius={[4, 4, 0, 0]}
-                  name="Applications"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData.barData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis
+                dataKey="date"
+                className="text-xs"
+                tick={{ fontSize: 12 }}
+                interval="preserveStartEnd"
+              />
+              <YAxis className="text-xs" tick={{ fontSize: 12 }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  borderColor: 'hsl(var(--border))',
+                  borderRadius: '6px',
+                }}
+                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                labelStyle={{ color: 'hsl(var(--foreground))' }}
+              />
+              <Bar
+                dataKey="shipments"
+                fill="hsl(var(--primary))"
+                radius={[4, 4, 0, 0]}
+                name="Shipments"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Campaign Status Distribution */}
+      {/* 🚚 Order Status Distribution */}
       <Card className="col-span-1">
         <CardHeader>
-          <CardTitle>Campaign Status</CardTitle>
-          <CardDescription>Distribution of campaign statuses</CardDescription>
+          <CardTitle>Order Status Distribution</CardTitle>
+          <CardDescription>Distribution of shipment statuses</CardDescription>
         </CardHeader>
         <CardContent className="h-80">
-          {chartData.error ? renderError() : chartData.isLoading ? (
-            <div className="h-full w-full bg-muted animate-pulse rounded"></div>
-          ) : chartData.pieData.length === 0 || (chartData.pieData.length === 1 && chartData.pieData[0].name === 'No Campaigns') ? 
-            renderEmptyState('No campaign data available') : (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData.pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {chartData.pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36} 
-                  wrapperStyle={{ fontSize: '12px' }}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    borderColor: 'hsl(var(--border))',
-                    borderRadius: '6px'
-                  }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData.pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={5}
+                dataKey="value"
+                label={({ name, percent }) =>
+                  `${name} ${(percent * 100).toFixed(0)}%`
+                }
+                labelLine={false}
+              >
+                {chartData.pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                wrapperStyle={{ fontSize: '12px' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'hsl(var(--card))',
+                  borderColor: 'hsl(var(--border))',
+                  borderRadius: '6px',
+                }}
+                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                labelStyle={{ color: 'hsl(var(--foreground))' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>

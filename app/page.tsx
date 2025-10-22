@@ -26,7 +26,7 @@ export default function LandingPage() {
     router.push(`/${selectedRole.toLowerCase()}/login`);
   };
 
-  const roles = ['Supplier', 'Logistic', 'Owner'];
+  const roles = ['Supplier', 'Owner'];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -58,13 +58,13 @@ export default function LandingPage() {
             <div className="space-y-6">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 dark:bg-black/50 text-black dark:text-white text-sm font-medium border border-gray-200 dark:border-gray-800">
                 <span className="w-2 h-2 bg-black dark:bg-white rounded-full mr-2 animate-pulse"></span>
-                Revolutionizing Talent Acquisition
+                Revolutionizing Supply chain management 
               </div>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-gray-950 via-gray-800 to-stone-950 dark:from-white dark:via-white dark:to-white bg-clip-text text-transparent">
                 Streamline Your
                 <br />
                 <span className="bg-gradient-to-r from-stone-950 to-gray-900 dark:from-white dark:to-white bg-clip-text text-transparent">
-                  Talent Recruitment
+                  Supply chain management
                 </span>
               </h1>
               <p className="text-xl text-gray-600 dark:text-white max-w-2xl mx-auto leading-relaxed">
@@ -118,7 +118,7 @@ export default function LandingPage() {
               {/* Brand Section */}
               <div className="col-span-1 md:col-span-2 space-y-4">
                 <h3 className="text-2xl font-bold text-black dark:text-white">
-                  INTERAIN
+                  SCM
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed max-w-md">
                   Revolutionizing talent acquisition by connecting SMEs with expert recruitment crews. 

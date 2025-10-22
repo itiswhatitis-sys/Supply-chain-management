@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { StatsCards } from '@/components/dashboard/StatsCards';
-import { CampaignChart } from '@/components/dashboard/CampaignChart';
+import { StatsCards } from '@/components/ownerdashboard/StatsCards';
+import { SupplyChainChart } from '@/components/ownerdashboard/CampaignChart';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -105,7 +105,7 @@ export default function SupplierDashboardPage() {
         </div>
 
         <StatsCards className="mb-8" />
-        <CampaignChart className="mb-8" />
+        <SupplyChainChart className="mb-8" />
         <ActivityFeed className="mb-8" />
       </div>
     </div>
