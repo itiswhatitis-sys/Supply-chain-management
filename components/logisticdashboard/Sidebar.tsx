@@ -3,18 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
+  LogOut,
+  Menu,
   ChevronDown
 } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
-import { 
+import {
   Sheet,
   SheetContent,
   SheetTrigger,
@@ -26,10 +27,10 @@ import {
 } from '@/components/ui/collapsible';
 
 interface SidebarProps {
-  onLogout: () => void;
+  className?: string;
 }
 
-export function Sidebar({ onLogout }: SidebarProps) {
+export function Sidebar({ className }: SidebarProps = {}) {
   const pathname = usePathname();
   const [openCampaigns, setOpenCampaigns] = useState(false);
 
@@ -38,13 +39,12 @@ export function Sidebar({ onLogout }: SidebarProps) {
   };
 
   const NavItem = ({ path, label, icon: Icon }: { path: string; label: string; icon: React.ElementType }) => (
-    <Link 
-      href={path} 
-      className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-        isActive(path) 
-          ? 'bg-primary text-primary-foreground' 
+    <Link
+      href={path}
+      className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive(path)
+          ? 'bg-primary text-primary-foreground'
           : 'hover:bg-muted'
-      }`}
+        }`}
     >
       <Icon className="h-5 w-5" />
       <span>{label}</span>
@@ -58,11 +58,11 @@ export function Sidebar({ onLogout }: SidebarProps) {
           <span className="text-xl font-bold text-primary">INTERAIN</span>
         </Link>
       </div>
-      
+
       <div className="flex-1 py-6 px-4 space-y-6">
         <div className="space-y-1">
           <NavItem path="/dashboard" label="Dashboard" icon={LayoutDashboard} />
-          
+
           <Collapsible
             open={openCampaigns}
             onOpenChange={setOpenCampaigns}
@@ -71,9 +71,8 @@ export function Sidebar({ onLogout }: SidebarProps) {
             <CollapsibleTrigger asChild>
               <Button
                 variant={isActive('/campaigns') ? "default" : "ghost"}
-                className={`w-full justify-between ${
-                  isActive('/shipment') ? 'bg-primary text-primary-foreground' : ''
-                }`}
+                className={`w-full justify-between ${isActive('/shipment') ? 'bg-primary text-primary-foreground' : ''
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5" />
@@ -83,34 +82,32 @@ export function Sidebar({ onLogout }: SidebarProps) {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="pl-9 mt-1 space-y-1">
-              <Link 
-                href="/campaigns" 
-                className={`block py-2 px-3 rounded-md transition-colors ${
-                  pathname === '/campaigns' ? 'bg-muted font-medium' : 'hover:bg-muted'
-                }`}
+              <Link
+                href="/campaigns"
+                className={`block py-2 px-3 rounded-md transition-colors ${pathname === '/campaigns' ? 'bg-muted font-medium' : 'hover:bg-muted'
+                  }`}
               >
                 All Shipment
               </Link>
-              <Link 
-                href="/campaigns/create" 
-                className={`block py-2 px-3 rounded-md transition-colors ${
-                  pathname === '/campaigns/create' ? 'bg-muted font-medium' : 'hover:bg-muted'
-                }`}
+              <Link
+                href="/campaigns/create"
+                className={`block py-2 px-3 rounded-md transition-colors ${pathname === '/campaigns/create' ? 'bg-muted font-medium' : 'hover:bg-muted'
+                  }`}
               >
                 Create Shipment
               </Link>
             </CollapsibleContent>
           </Collapsible>
-            <NavItem path="/logistics" label="Logistics" icon={Users} />
+          <NavItem path="/logistics" label="Logistics" icon={Users} />
           <NavItem path="/team" label="Team" icon={FileText} />
           <NavItem path="/profile" label="Company Profile" icon={Settings} />
         </div>
       </div>
-      
+
       <div className="p-4 border-t mt-auto">
         <div className="flex items-center justify-between">
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={onLogout}>
+          <Button variant="ghost" size="icon" onClick={() => signOut({ callbackUrl: "/" })}>
             <LogOut className="h-5 w-5" />
           </Button>
         </div>
@@ -124,14 +121,14 @@ export function Sidebar({ onLogout }: SidebarProps) {
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r bg-background z-10">
         <NavContent />
       </aside>
-      
+
       {/* Mobile Sidebar */}
       <div className="md:hidden border-b bg-background sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-xl font-bold text-primary">INTERAIN</span>
           </Link>
-          
+
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Sheet>

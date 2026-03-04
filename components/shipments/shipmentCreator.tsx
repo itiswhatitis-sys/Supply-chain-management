@@ -77,14 +77,14 @@ type ItemType = {
 };
 
 export function ShipmentCreator() {
-     const { data: session, status } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Invitees
     invitees: [] as InviteeType[],
-    
+
     // Step 2: Shipment Details
     title: '',
     description: '',
@@ -98,14 +98,13 @@ export function ShipmentCreator() {
     preferredMode: 'road' as 'road' | 'rail' | 'air' | 'sea',
     priority: 'medium' as 'low' | 'medium' | 'high',
     qualityChecksRequired: [] as string[],
-    
+
     // Step 3: Items
     items: [] as ItemType[],
   });
 
-    if (!session) return null ;
-
-    console.log("session id :",session?.user.id) 
+  if (!session) return null ;
+  console.log("session id :", session?.user?.id)
   // Step 1 form - Invitees
   const inviteesForm = useForm<z.infer<typeof inviteesSchema>>({
     resolver: zodResolver(inviteesSchema),
@@ -148,7 +147,7 @@ export function ShipmentCreator() {
 
   // Handle quality checks input
   const [qualityCheckInput, setQualityCheckInput] = useState('');
-  
+
   const addQualityCheck = () => {
     if (qualityCheckInput.trim() && !formData.qualityChecksRequired.includes(qualityCheckInput.trim())) {
       const updatedChecks = [...formData.qualityChecksRequired, qualityCheckInput.trim()];
@@ -222,7 +221,7 @@ export function ShipmentCreator() {
       const finalData = {
         title: formData.title,
         description: formData.description,
-        ownerEmail: session.user.email , // In real app, this would come from auth context
+        ownerEmail: session.user.email, // In real app, this would come from auth context
         destination: formData.destination,
         expectedDeliveryDate: formData.expectedDeliveryDate,
         items: values.items,
@@ -235,31 +234,31 @@ export function ShipmentCreator() {
         qualityChecksRequired: formData.qualityChecksRequired,
         trackingStatus: 'created' as const,
       };
-      
+
       console.log('Final Shipment Data:', finalData);
 
 
-    //api to submit data
-    const response = await fetch('/api/shipment/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(finalData),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to create shipment');
-    }
-    
-    const result = await response.json();
-    console.log('Created shipment:', result);
-      
+      //api to submit data
+      const response = await fetch('/api/shipment/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(finalData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create shipment');
+      }
+
+      const result = await response.json();
+      console.log('Created shipment:', result);
+
       toast.success('Success', {
         description: 'Shipment created successfully (check console for data)'
       });
-      
+
       // In a real app, you would make an API call here
       // const response = await fetch('/api/shipments/create', {
       //   method: 'POST',
@@ -268,7 +267,7 @@ export function ShipmentCreator() {
       //   },
       //   body: JSON.stringify(finalData),
       // });
-      
+
       router.push('/owner/shipments');
       setIsLoading(false);
     } catch (error: unknown) {
@@ -304,10 +303,12 @@ export function ShipmentCreator() {
     }
   };
 
+  if (!session) return null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* <Sidebar onLogout={handleLogout} /> */}
-      
+
       <div className="md:ml-64 p-4 md:p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Create Shipment</h1>
@@ -315,7 +316,7 @@ export function ShipmentCreator() {
             Set up a new shipment and invite collaborators
           </p>
         </div>
-        
+
         {/* Progress Bar */}
         <div className="mb-8">
           <Progress value={step * 33.33} className="h-2" />
@@ -325,7 +326,7 @@ export function ShipmentCreator() {
             <span className={step >= 3 ? 'font-medium text-primary' : ''}>Items & Review</span>
           </div>
         </div>
-        
+
         {/* Step 1: Invite Collaborators */}
         {step === 1 && (
           <Card>
@@ -373,15 +374,15 @@ export function ShipmentCreator() {
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={inviteesForm.control}
                             name={`invitees.${index}.role`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Role</FormLabel>
-                                <Select 
-                                  onValueChange={field.onChange} 
+                                <Select
+                                  onValueChange={field.onChange}
                                   defaultValue={field.value}
                                 >
                                   <FormControl>
@@ -399,7 +400,7 @@ export function ShipmentCreator() {
                             )}
                           />
                         </div>
-                        
+
                         <FormField
                           control={inviteesForm.control}
                           name={`invitees.${index}.note`}
@@ -407,10 +408,10 @@ export function ShipmentCreator() {
                             <FormItem>
                               <FormLabel>Note (Optional)</FormLabel>
                               <FormControl>
-                                <Textarea 
-                                  placeholder="Add a note for this collaborator..." 
+                                <Textarea
+                                  placeholder="Add a note for this collaborator..."
                                   className="min-h-[80px]"
-                                  {...field} 
+                                  {...field}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -420,7 +421,7 @@ export function ShipmentCreator() {
                       </CardContent>
                     </Card>
                   ))}
-                  
+
                   <Button
                     type="button"
                     variant="outline"
@@ -429,7 +430,7 @@ export function ShipmentCreator() {
                   >
                     <Plus className="mr-2 h-4 w-4" /> Add Another Invitee
                   </Button>
-                  
+
                   <div className="flex justify-end">
                     <Button type="submit">
                       Next <ArrowRight className="ml-2 h-4 w-4" />
@@ -440,7 +441,7 @@ export function ShipmentCreator() {
             </CardContent>
           </Card>
         )}
-        
+
         {/* Step 2: Shipment Details */}
         {step === 2 && (
           <Card>
@@ -468,7 +469,7 @@ export function ShipmentCreator() {
                       )}
                     />
                   </div>
-                  
+
                   <FormField
                     control={shipmentDetailsForm.control}
                     name="description"
@@ -476,17 +477,17 @@ export function ShipmentCreator() {
                       <FormItem>
                         <FormLabel>Description (Optional)</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Describe the shipment details..." 
+                          <Textarea
+                            placeholder="Describe the shipment details..."
                             className="min-h-[100px]"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   {/* Destination */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Destination</h3>
@@ -504,7 +505,7 @@ export function ShipmentCreator() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={shipmentDetailsForm.control}
                         name="destination.city"
@@ -518,7 +519,7 @@ export function ShipmentCreator() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={shipmentDetailsForm.control}
                         name="destination.state"
@@ -532,7 +533,7 @@ export function ShipmentCreator() {
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={shipmentDetailsForm.control}
                         name="destination.country"
@@ -548,7 +549,7 @@ export function ShipmentCreator() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={shipmentDetailsForm.control}
@@ -564,15 +565,15 @@ export function ShipmentCreator() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={shipmentDetailsForm.control}
                       name="preferredMode"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Preferred Mode</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
+                          <Select
+                            onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
@@ -591,15 +592,15 @@ export function ShipmentCreator() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={shipmentDetailsForm.control}
                       name="priority"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Priority</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
+                          <Select
+                            onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
@@ -618,7 +619,7 @@ export function ShipmentCreator() {
                       )}
                     />
                   </div>
-                  
+
                   {/* Quality Checks */}
                   <FormField
                     control={shipmentDetailsForm.control}
@@ -662,7 +663,7 @@ export function ShipmentCreator() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="flex justify-between">
                     <Button type="button" variant="outline" onClick={() => setStep(1)}>
                       <ArrowLeft className="mr-2 h-4 w-4" /> Back
@@ -676,218 +677,219 @@ export function ShipmentCreator() {
             </CardContent>
           </Card>
         )}
-        
-        {/* Step 3: Items & Review */}
-       {step === 3 && (
-  <Card>
-    <CardHeader>
-      <CardTitle>Items & Review</CardTitle>
-      <CardDescription>
-        Add items to the shipment and review all details
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Form {...itemsForm}>
-        <form onSubmit={itemsForm.handleSubmit(onSubmitItems)} className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Items</h3>
-            {itemsForm.watch('items').map((item, index) => (
-              <Card key={index} className="border border-muted">
-                <CardHeader className="bg-muted/50 py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-medium">
-                        {index + 1}
-                      </span>
-                      <CardTitle className="text-lg">Item {index + 1}</CardTitle>
-                    </div>
-                    {index > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="py-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={itemsForm.control}
-                      name={`items.${index}.sku`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>SKU</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. ELEC-001" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={itemsForm.control}
-                      name={`items.${index}.description`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. LED Display Panel" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={itemsForm.control}
-                      name={`items.${index}.quantity`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantity</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="1"
-                              placeholder="e.g. 50"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={itemsForm.control}
-                      name={`items.${index}.unit`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unit</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g. pcs, kg, liters" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={itemsForm.control}
-                      name={`items.${index}.weightKg`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Weight (kg)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="e.g. 25.5"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addItem}
-              className="w-full"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add Another Item
-            </Button>
-          </div>
-          
-          {/* Review Section */}
-          <div className="space-y-4 border-t pt-6">
-            <h3 className="text-lg font-semibold">Review</h3>
-            
-            <div className="bg-muted/50 p-4 rounded-md space-y-3">
-              <div>
-                <p className="text-sm font-medium">Shipment Title</p>
-                <p className="text-sm text-muted-foreground">{formData.title}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium">Destination</p>
-                <p className="text-sm text-muted-foreground">
-                  {formData.destination.address}, {formData.destination.city}, {formData.destination.state}, {formData.destination.country}
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium">Expected Delivery</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formData.expectedDeliveryDate.toLocaleDateString()}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium">Preferred Mode</p>
-                  <p className="text-sm text-muted-foreground capitalize">{formData.preferredMode}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium">Priority</p>
-                  <p className="text-sm text-muted-foreground capitalize">{formData.priority}</p>
-                </div>
-              </div>
-              
-              {formData.invitees.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium">Invitees</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {formData.invitees.map((invitee, index) => (
-                      <Badge key={index} variant="secondary">
-                        {invitee.email} ({invitee.role})
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {formData.qualityChecksRequired.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium">Quality Checks</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {formData.qualityChecksRequired.map((check) => (
-                      <Badge key={check} variant="outline">
-                        {check}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={() => setStep(2)}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating Shipment...' : 'Create Shipment'}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </CardContent>
-  </Card>
-)}
 
-  </div>
-          </div>
-)}
+        {/* Step 3: Items & Review */}
+        {step === 3 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Items & Review</CardTitle>
+              <CardDescription>
+                Add items to the shipment and review all details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...itemsForm}>
+                <form onSubmit={itemsForm.handleSubmit(onSubmitItems)} className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Items</h3>
+                    {itemsForm.watch('items').map((item, index) => (
+                      <Card key={index} className="border border-muted">
+                        <CardHeader className="bg-muted/50 py-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                                {index + 1}
+                              </span>
+                              <CardTitle className="text-lg">Item {index + 1}</CardTitle>
+                            </div>
+                            {index > 0 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeItem(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="py-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={itemsForm.control}
+                              name={`items.${index}.sku`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>SKU</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. ELEC-001" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={itemsForm.control}
+                              name={`items.${index}.description`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Description (Optional)</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. LED Display Panel" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={itemsForm.control}
+                              name={`items.${index}.quantity`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Quantity</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      placeholder="e.g. 50"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={itemsForm.control}
+                              name={`items.${index}.unit`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Unit</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. pcs, kg, liters" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={itemsForm.control}
+                              name={`items.${index}.weightKg`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Weight (kg)</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="e.g. 25.5"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addItem}
+                      className="w-full"
+                    >
+                      <Plus className="mr-2 h-4 w-4" /> Add Another Item
+                    </Button>
+                  </div>
+
+                  {/* Review Section */}
+                  <div className="space-y-4 border-t pt-6">
+                    <h3 className="text-lg font-semibold">Review</h3>
+
+                    <div className="bg-muted/50 p-4 rounded-md space-y-3">
+                      <div>
+                        <p className="text-sm font-medium">Shipment Title</p>
+                        <p className="text-sm text-muted-foreground">{formData.title}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium">Destination</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formData.destination.address}, {formData.destination.city}, {formData.destination.state}, {formData.destination.country}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-sm font-medium">Expected Delivery</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formData.expectedDeliveryDate.toLocaleDateString()}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-medium">Preferred Mode</p>
+                          <p className="text-sm text-muted-foreground capitalize">{formData.preferredMode}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-medium">Priority</p>
+                          <p className="text-sm text-muted-foreground capitalize">{formData.priority}</p>
+                        </div>
+                      </div>
+
+                      {formData.invitees.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium">Invitees</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {formData.invitees.map((invitee, index) => (
+                              <Badge key={index} variant="secondary">
+                                {invitee.email} ({invitee.role})
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {formData.qualityChecksRequired.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium">Quality Checks</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {formData.qualityChecksRequired.map((check) => (
+                              <Badge key={check} variant="outline">
+                                {check}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <Button type="button" variant="outline" onClick={() => setStep(2)}>
+                      <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? 'Creating Shipment...' : 'Create Shipment'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
+
+      </div>
+    </div>
+  )
+}

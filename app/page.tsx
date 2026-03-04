@@ -70,7 +70,7 @@ export default function LandingPage() {
               <p className="text-xl text-gray-600 dark:text-white max-w-2xl mx-auto leading-relaxed">
                 Connect SMEs with recruitment crews to find the best talent efficiently and effectively. 
                 <br className="hidden sm:block" />
-                Transform your hiring process with intelligent matching and streamlined workflows.
+                {/* Transform your hiring process with intelligent matching and streamlined workflows. */}
               </p>
             </div>
             

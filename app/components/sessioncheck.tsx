@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-export const sessioncheck = async () => {
+export const SessionCheck = async () => {
 // code to checkuser logged in and role 
 // client component 
   const { data: session, status } = useSession();
